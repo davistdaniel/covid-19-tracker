@@ -24,6 +24,10 @@ url_csv = 'https://opendata.ecdc.europa.eu/covid19/casedistribution/csv'
 # readinf dropping all NAN values
 df_covid_2019 = pd.read_csv(url_csv)
 df_covid_2019 = df_covid_2019.dropna()
+#df_covid_2019['cases_weekly'] = df_covid_2019['cases_weekly_weekly']
+#df_covid_2019['deaths_weekly'] = df_covid_2019['deaths_weekly_weekly']
+#df_covid_2019['notification_rate_per_100000_population_14-days'] = df_covid_2019['notification_rate_per_100000_population_14-days']
+
 
 class Ui_CovidTracker(object):
     def setupUi(self, CovidTracker):
@@ -183,7 +187,7 @@ class Ui_CovidTracker(object):
         self.speak_button.setText(_translate("CovidTracker", "Speak!"))
         self.reset_button.setText(_translate("CovidTracker", "Reset!"))
         self.plot_type.setItemText(0, _translate("CovidTracker", "Infections"))
-        self.plot_type.setItemText(1, _translate("CovidTracker", "Deaths"))
+        self.plot_type.setItemText(1, _translate("CovidTracker", "deaths_weekly"))
         self.plot_type.setItemText(2, _translate("CovidTracker", "Cumulative"))
         self.plot_type.setItemText(3, _translate("CovidTracker", "Comparison"))
         self.dark_light.setItemText(0, _translate("CovidTracker", "Dark"))
@@ -219,10 +223,10 @@ class Ui_CovidTracker(object):
             self.country_input = random.choice(np.array(self.country_list))
         self.country_name.setText(self.country_input.replace('_',' '))
         self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Selected country is '+self.country_input)
-        self.cases = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['cases'])[::-1]
+        self.cases_weekly = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['cases_weekly'])[::-1]
         self.dates = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['dateRep'])[::-1]
-        self.deaths = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['deaths'])[::-1]
-        self.cumulative = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['Cumulative_number_for_14_days_of_COVID-19_cases_per_100000'])[::-1]
+        self.deaths_weekly = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['deaths_weekly'])[::-1]
+        self.cumulative = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['notification_rate_per_100000_population_14-days'])[::-1]
         
         if self.plot_type.currentIndex() == 0:
             
@@ -231,11 +235,11 @@ class Ui_CovidTracker(object):
             self.graphicsView.addLegend()
             self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Plotting Infections')
             self.graphicsView.clear()
-            self.x_cases = np.arange(0,len(self.cases))
+            self.x_cases_weekly = np.arange(0,len(self.cases_weekly))
             axis_bottom = self.graphicsView.getAxis('bottom')
-            axis_bottom.setTicks([[(i,j) for i,j in zip(self.x_cases[0:len(self.x_cases):20],self.dates[0:len(self.cases):20])],[(i,'') for j,i in enumerate(self.x_cases[0:len(self.cases):10])]])
+            axis_bottom.setTicks([[(i,j) for i,j in zip(self.x_cases_weekly[0:len(self.x_cases_weekly):20],self.dates[0:len(self.cases_weekly):20])],[(i,'') for j,i in enumerate(self.x_cases_weekly[0:len(self.cases_weekly):10])]])
 
-            self.graphicsView.plot(self.x_cases,self.cases,pen=pg.mkPen(color=(255,0,0),width=2),name='Cases in '+self.country_input,symbol='o',
+            self.graphicsView.plot(self.x_cases_weekly,self.cases_weekly,pen=pg.mkPen(color=(255,0,0),width=2),name='cases_weekly in '+self.country_input,symbol='o',
             symbolSize=7,symbolBrush=(255,0,0))
             ui.progressBar.setValue(100)
             #data_table
@@ -243,61 +247,61 @@ class Ui_CovidTracker(object):
             self.data_table.insertColumn(self.data_table_num-2)
             self.data_table.setHorizontalHeaderItem(self.data_table_num-2,QtWidgets.QTableWidgetItem('Date('+self.country_input+')'))
             self.data_table.insertColumn(self.data_table_num-1)
-            self.data_table.setHorizontalHeaderItem(self.data_table_num-1,QtWidgets.QTableWidgetItem('Cases('+self.country_input+')'))
+            self.data_table.setHorizontalHeaderItem(self.data_table_num-1,QtWidgets.QTableWidgetItem('cases_weekly('+self.country_input+')'))
             self.data_table.setCurrentCell(0,self.data_table_num-2)
-            for i in range(len(self.cases)):
+            for i in range(len(self.cases_weekly)):
                 
                 rowPosition = self.data_table.rowCount()
                 self.data_table.insertRow(rowPosition)
                 self.data_table.setItem(i,self.data_table_num-2,QtWidgets.QTableWidgetItem(str(self.dates[i])))
-                self.data_table.setItem(i,self.data_table_num-1,QtWidgets.QTableWidgetItem(str(self.cases[i])))
+                self.data_table.setItem(i,self.data_table_num-1,QtWidgets.QTableWidgetItem(str(self.cases_weekly[i])))
 
             #second_plot
             color = self.color_list[self.num_iter]
             axis_bottom1 = self.graphicsView_2.getAxis('bottom')
-            axis_bottom1.setTicks([[(i,j) for i,j in zip(self.x_cases[0:len(self.x_cases):20],self.dates[0:len(self.cases):20])],[(i,'') for j,i in enumerate(self.x_cases[0:len(self.cases):10])]])
+            axis_bottom1.setTicks([[(i,j) for i,j in zip(self.x_cases_weekly[0:len(self.x_cases_weekly):20],self.dates[0:len(self.cases_weekly):20])],[(i,'') for j,i in enumerate(self.x_cases_weekly[0:len(self.cases_weekly):10])]])
             self.graphicsView_2.addLegend()
-            self.graphicsView_2.plot(self.x_cases,self.cases,pen=pg.mkPen(color=color,width=2),name='Cases in '+self.country_input,symbol='o',symbolBrush=color)
+            self.graphicsView_2.plot(self.x_cases_weekly,self.cases_weekly,pen=pg.mkPen(color=color,width=2),name='cases_weekly in '+self.country_input,symbol='o',symbolBrush=color)
         
         if self.plot_type.currentIndex() == 1:
 
             #main plot
             self.graphicsView.addLegend()
-            self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Plotting Deaths')
+            self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Plotting deaths_weekly')
             self.graphicsView.clear()
-            self.x_deaths = np.arange(0,len(self.deaths))
+            self.x_deaths_weekly = np.arange(0,len(self.deaths_weekly))
 
             axis_bottom = self.graphicsView.getAxis('bottom')
-            axis_bottom.setTicks([[(i,j) for i,j in zip(self.x_deaths[0:len(self.x_deaths):20],self.dates[0:len(self.deaths):20])],[(i,'') for j,i in enumerate(self.x_deaths[0:len(self.deaths):10])]])
+            axis_bottom.setTicks([[(i,j) for i,j in zip(self.x_deaths_weekly[0:len(self.x_deaths_weekly):20],self.dates[0:len(self.deaths_weekly):20])],[(i,'') for j,i in enumerate(self.x_deaths_weekly[0:len(self.deaths_weekly):10])]])
             
-            self.graphicsView.plot(self.x_deaths,self.deaths,pen=pg.mkPen(color=(200,200,200), width=2),name='Deaths in '+self.country_input,symbol='o',
+            self.graphicsView.plot(self.x_deaths_weekly,self.deaths_weekly,pen=pg.mkPen(color=(200,200,200), width=2),name='deaths_weekly in '+self.country_input,symbol='o',
             symbolSize=7,symbolBrush=(200,200,200))
             ui.progressBar.setValue(100)
             #data_table
             self.data_table.insertColumn(self.data_table_num-2)
             self.data_table.setHorizontalHeaderItem(self.data_table_num-2,QtWidgets.QTableWidgetItem('Date('+self.country_input+')'))
             self.data_table.insertColumn(self.data_table_num-1)
-            self.data_table.setHorizontalHeaderItem(self.data_table_num-1,QtWidgets.QTableWidgetItem('Deaths('+self.country_input+')'))
+            self.data_table.setHorizontalHeaderItem(self.data_table_num-1,QtWidgets.QTableWidgetItem('deaths_weekly('+self.country_input+')'))
             self.data_table.setCurrentCell(0,self.data_table_num-2)
-            for i in range(len(self.deaths)):
+            for i in range(len(self.deaths_weekly)):
                 
                 rowPosition = self.data_table.rowCount()
                 self.data_table.insertRow(rowPosition)
                 self.data_table.setItem(i,self.data_table_num-2,QtWidgets.QTableWidgetItem(str(self.dates[i])))
-                self.data_table.setItem(i,self.data_table_num-1,QtWidgets.QTableWidgetItem(str(self.deaths[i])))
+                self.data_table.setItem(i,self.data_table_num-1,QtWidgets.QTableWidgetItem(str(self.deaths_weekly[i])))
             
             #second plot
             color = self.color_list[self.num_iter]
             axis_bottom1 = self.graphicsView_2.getAxis('bottom')
-            axis_bottom1.setTicks([[(i,j) for i,j in zip(self.x_deaths[0:len(self.x_deaths):20],self.dates[0:len(self.deaths):20])],[(i,'') for j,i in enumerate(self.x_deaths[0:len(self.deaths):10])]])
+            axis_bottom1.setTicks([[(i,j) for i,j in zip(self.x_deaths_weekly[0:len(self.x_deaths_weekly):20],self.dates[0:len(self.deaths_weekly):20])],[(i,'') for j,i in enumerate(self.x_deaths_weekly[0:len(self.deaths_weekly):10])]])
             self.graphicsView_2.addLegend()
-            self.graphicsView_2.plot(self.x_deaths,self.deaths,pen=pg.mkPen(color=color,width=2),name='Deaths in '+self.country_input,symbol='o',symbolBrush=color)
+            self.graphicsView_2.plot(self.x_deaths_weekly,self.deaths_weekly,pen=pg.mkPen(color=color,width=2),name='deaths_weekly in '+self.country_input,symbol='o',symbolBrush=color)
         
         if self.plot_type.currentIndex() == 2:
 
             #main plot
             self.graphicsView.addLegend()
-            self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Plotting Cumulative Average of 14 days per 100000 cases')
+            self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Plotting Cumulative Average of 14 days per 100000 cases_weekly')
             self.graphicsView.clear()
             self.x_cumulative = np.arange(0,len(self.cumulative))
 
@@ -330,17 +334,17 @@ class Ui_CovidTracker(object):
             self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Plotting comparison')
             self.graphicsView.clear()
             self.graphicsView.addLegend()
-            self.x_cases = np.arange(0,len(self.cases))
+            self.x_cases_weekly = np.arange(0,len(self.cases_weekly))
             self.graphicsView.showGrid(x=True,y=True)
 
             axis_bottom = self.graphicsView.getAxis('bottom')
-            axis_bottom.setTicks([[(i,j) for i,j in zip(self.x_cases[0:len(self.x_cases):20],self.dates[0:len(self.cases):20])],[(i,'') for j,i in enumerate(self.x_cases[0:len(self.cases):10])]])
+            axis_bottom.setTicks([[(i,j) for i,j in zip(self.x_cases_weekly[0:len(self.x_cases_weekly):20],self.dates[0:len(self.cases_weekly):20])],[(i,'') for j,i in enumerate(self.x_cases_weekly[0:len(self.cases_weekly):10])]])
             
-            self.graphicsView.plot(self.x_cases,abs(self.cases),pen=(255,0,0),name='Cases in '+self.country_input,symbol='o',
+            self.graphicsView.plot(self.x_cases_weekly,abs(self.cases_weekly),pen=(255,0,0),name='cases_weekly in '+self.country_input,symbol='o',
             symbolSize=7,symbolBrush=(255,0,0))
-            self.graphicsView.plot(self.x_cases,abs(self.deaths),pen=(200,200,200),name='Deaths in '+self.country_input,symbol='o',
+            self.graphicsView.plot(self.x_cases_weekly,abs(self.deaths_weekly),pen=(200,200,200),name='deaths_weekly in '+self.country_input,symbol='o',
             symbolSize=7,symbolBrush=(200,200,200))
-            self.graphicsView.plot(self.x_cases,abs(self.cumulative),pen=(0,0,255),name='Cumulative in '+self.country_input,symbol='o',
+            self.graphicsView.plot(self.x_cases_weekly,abs(self.cumulative),pen=(0,0,255),name='Cumulative in '+self.country_input,symbol='o',
             symbolSize=7,symbolBrush=(0,0,255))
             ui.progressBar.setValue(100)
 
@@ -349,9 +353,9 @@ class Ui_CovidTracker(object):
             self.data_table.insertColumn(self.data_table_num-4)
             self.data_table.setHorizontalHeaderItem(self.data_table_num-4,QtWidgets.QTableWidgetItem('Date('+self.country_input+')'))
             self.data_table.insertColumn(self.data_table_num-3)
-            self.data_table.setHorizontalHeaderItem(self.data_table_num-3,QtWidgets.QTableWidgetItem('Cases('+self.country_input+')'))
+            self.data_table.setHorizontalHeaderItem(self.data_table_num-3,QtWidgets.QTableWidgetItem('cases_weekly('+self.country_input+')'))
             self.data_table.insertColumn(self.data_table_num-2)
-            self.data_table.setHorizontalHeaderItem(self.data_table_num-2,QtWidgets.QTableWidgetItem('Deaths('+self.country_input+')'))
+            self.data_table.setHorizontalHeaderItem(self.data_table_num-2,QtWidgets.QTableWidgetItem('deaths_weekly('+self.country_input+')'))
             self.data_table.insertColumn(self.data_table_num-1)
             self.data_table.setHorizontalHeaderItem(self.data_table_num-1,QtWidgets.QTableWidgetItem('Cumulative('+self.country_input+')'))
             self.data_table.setCurrentCell(0,self.data_table_num-4)
@@ -360,8 +364,8 @@ class Ui_CovidTracker(object):
                 rowPosition = self.data_table.rowCount()
                 self.data_table.insertRow(rowPosition)
                 self.data_table.setItem(i,self.data_table_num-4,QtWidgets.QTableWidgetItem(str(self.dates[i])))
-                self.data_table.setItem(i,self.data_table_num-3,QtWidgets.QTableWidgetItem(str(self.cases[i])))
-                self.data_table.setItem(i,self.data_table_num-2,QtWidgets.QTableWidgetItem(str(self.deaths[i])))
+                self.data_table.setItem(i,self.data_table_num-3,QtWidgets.QTableWidgetItem(str(self.cases_weekly[i])))
+                self.data_table.setItem(i,self.data_table_num-2,QtWidgets.QTableWidgetItem(str(self.deaths_weekly[i])))
                 self.data_table.setItem(i,self.data_table_num-1,QtWidgets.QTableWidgetItem(str(self.cumulative[i])))
             #self.graphicsView.setLogMode(x=False,y=True)
         
@@ -370,15 +374,15 @@ class Ui_CovidTracker(object):
         #     win = self.graphicsView_3
         #     pg.setConfigOptions(antialias=True)
             
-        #     p1 = win.addPlot(title='Cases')
+        #     p1 = win.addPlot(title='cases_weekly')
             
-        #     self.x_cases = np.arange(0,len(self.cases))
-        #     p1.plot(self.x_cases,self.cases,pen=pg.mkPen(color=(255,0,0),width=2),name='Cases in '+self.country_input,symbol='o',
+        #     self.x_cases_weekly = np.arange(0,len(self.cases_weekly))
+        #     p1.plot(self.x_cases_weekly,self.cases_weekly,pen=pg.mkPen(color=(255,0,0),width=2),name='cases_weekly in '+self.country_input,symbol='o',
         #     symbolSize=7,symbolBrush=(255,0,0))
 
-        #     p2 = win.addPlot(title='Deaths')
-        #     self.x_deaths = np.arange(0,len(self.deaths))
-        #     p2.plot(self.x_deaths,self.deaths,pen=pg.mkPen(color=(200,200,200), width=2),name='Deaths in '+self.country_input,symbol='o',
+        #     p2 = win.addPlot(title='deaths_weekly')
+        #     self.x_deaths_weekly = np.arange(0,len(self.deaths_weekly))
+        #     p2.plot(self.x_deaths_weekly,self.deaths_weekly,pen=pg.mkPen(color=(200,200,200), width=2),name='deaths_weekly in '+self.country_input,symbol='o',
         #     symbolSize=7,symbolBrush=(200,200,200))
 
         #     p3 = win.addPlot(title='Cumulative Average')
@@ -388,7 +392,7 @@ class Ui_CovidTracker(object):
         #     win.nextRow()
 
         #     p4 = win.addPlot(title = 'Covid Histogram')
-        #     y1,x1 = np.histogram(np.hstack(self.cases),bins=int(len(self.cases)/10))
+        #     y1,x1 = np.histogram(np.hstack(self.cases_weekly),bins=int(len(self.cases_weekly)/10))
         #     p4.plot(x1,y1,stepMode=True, fillLevel=1, fillOutline=True, brush=(255,0,0,150))
 
     def covid_plot_anim(self):
@@ -408,10 +412,10 @@ class Ui_CovidTracker(object):
             self.text_holder.append('Country Not found. Choosing Random Country.')
             self.country_input = random.choice(np.array(self.country_list))
         self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Selected country is '+self.country_input)
-        self.cases = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['cases'])[::-1]
+        self.cases_weekly = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['cases_weekly'])[::-1]
         self.dates = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['dateRep'])[::-1]
-        self.deaths = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['deaths'])[::-1]
-        self.cumulative = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['Cumulative_number_for_14_days_of_COVID-19_cases_per_100000'])[::-1]
+        self.deaths_weekly = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['deaths_weekly'])[::-1]
+        self.cumulative = np.array(self.df[self.df['countriesAndTerritories']==self.country_input]['notification_rate_per_100000_population_14-days'])[::-1]
         self.graphicsView.clear()
 
         if self.plot_type.currentIndex() == 0:
@@ -419,43 +423,43 @@ class Ui_CovidTracker(object):
             self.graphicsView.addLegend()
             self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Plotting Infections')
             self.graphicsView.clear()
-            self.x_cases = np.arange(0,len(self.cases))
+            self.x_cases_weekly = np.arange(0,len(self.cases_weekly))
             self.x=[]
             self.y=[]
             #data table
             self.data_table.insertColumn(self.data_table_num-2)
             self.data_table.setHorizontalHeaderItem(self.data_table_num-2,QtWidgets.QTableWidgetItem('Date('+self.country_input+')'))
             self.data_table.insertColumn(self.data_table_num-1)
-            self.data_table.setHorizontalHeaderItem(self.data_table_num-1,QtWidgets.QTableWidgetItem('Deaths('+self.country_input+')'))
+            self.data_table.setHorizontalHeaderItem(self.data_table_num-1,QtWidgets.QTableWidgetItem('deaths_weekly('+self.country_input+')'))
             self.data_table.setCurrentCell(0,self.data_table_num-2)
-            for i in range(len(self.deaths)):
+            for i in range(len(self.deaths_weekly)):
                 
                 rowPosition = self.data_table.rowCount()
                 self.data_table.insertRow(rowPosition)
                 self.data_table.setItem(i,self.data_table_num-2,QtWidgets.QTableWidgetItem(str(self.dates[i])))
-                self.data_table.setItem(i,self.data_table_num-1,QtWidgets.QTableWidgetItem(str(self.deaths[i])))
-            for i in range(len(self.cases)):
-                ui.progressBar.setValue(np.linspace(0,100,len(self.cases))[i])
+                self.data_table.setItem(i,self.data_table_num-1,QtWidgets.QTableWidgetItem(str(self.deaths_weekly[i])))
+            for i in range(len(self.cases_weekly)):
+                ui.progressBar.setValue(np.linspace(0,100,len(self.cases_weekly))[i])
                 self.graphicsView.clear()
-                self.x.append(self.x_cases[i])
-                self.y.append(self.cases[i])
-                self.graphicsView.plot(self.x,self.y,pen=pg.mkPen(color=(255,0,0),width=2),name='Cases in '+self.country_input,symbol='o',
+                self.x.append(self.x_cases_weekly[i])
+                self.y.append(self.cases_weekly[i])
+                self.graphicsView.plot(self.x,self.y,pen=pg.mkPen(color=(255,0,0),width=2),name='cases_weekly in '+self.country_input,symbol='o',
                 symbolSize=7,symbolBrush=(255,0,0))
                 pg.QtGui.QApplication.processEvents()
             #second_plot
             color = self.color_list[self.num_iter]
             axis_bottom1 = self.graphicsView_2.getAxis('bottom')
-            axis_bottom1.setTicks([[(i,j) for i,j in zip(self.x_cases[0:len(self.x_cases):20],self.dates[0:len(self.cases):20])],[(i,'') for j,i in enumerate(self.x_cases[0:len(self.cases):10])]])
+            axis_bottom1.setTicks([[(i,j) for i,j in zip(self.x_cases_weekly[0:len(self.x_cases_weekly):20],self.dates[0:len(self.cases_weekly):20])],[(i,'') for j,i in enumerate(self.x_cases_weekly[0:len(self.cases_weekly):10])]])
             self.graphicsView_2.addLegend()
-            self.graphicsView_2.plot(self.x_cases,self.cases,pen=pg.mkPen(color=color,width=2),name='Cases in '+self.country_input,symbol='o',symbolBrush=color)
+            self.graphicsView_2.plot(self.x_cases_weekly,self.cases_weekly,pen=pg.mkPen(color=color,width=2),name='cases_weekly in '+self.country_input,symbol='o',symbolBrush=color)
         
             
         
         if self.plot_type.currentIndex() == 1:
             self.graphicsView.addLegend()
-            self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Plotting Deaths')
+            self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Plotting deaths_weekly')
             self.graphicsView.clear()
-            self.x_deaths = np.arange(0,len(self.deaths))
+            self.x_deaths_weekly = np.arange(0,len(self.deaths_weekly))
             self.x=[]
             self.y=[]
 
@@ -463,35 +467,35 @@ class Ui_CovidTracker(object):
             self.data_table.insertColumn(self.data_table_num-2)
             self.data_table.setHorizontalHeaderItem(self.data_table_num-2,QtWidgets.QTableWidgetItem('Date('+self.country_input+')'))
             self.data_table.insertColumn(self.data_table_num-1)
-            self.data_table.setHorizontalHeaderItem(self.data_table_num-1,QtWidgets.QTableWidgetItem('Deaths('+self.country_input+')'))
+            self.data_table.setHorizontalHeaderItem(self.data_table_num-1,QtWidgets.QTableWidgetItem('deaths_weekly('+self.country_input+')'))
             self.data_table.setCurrentCell(0,self.data_table_num-2)
-            for i in range(len(self.deaths)):
+            for i in range(len(self.deaths_weekly)):
                 
                 rowPosition = self.data_table.rowCount()
                 self.data_table.insertRow(rowPosition)
                 self.data_table.setItem(i,self.data_table_num-2,QtWidgets.QTableWidgetItem(str(self.dates[i])))
-                self.data_table.setItem(i,self.data_table_num-1,QtWidgets.QTableWidgetItem(str(self.deaths[i])))
+                self.data_table.setItem(i,self.data_table_num-1,QtWidgets.QTableWidgetItem(str(self.deaths_weekly[i])))
 
             #main_anim_plot
-            for i in range(len(self.deaths)):
-                ui.progressBar.setValue(np.linspace(0,100,len(self.deaths))[i])
+            for i in range(len(self.deaths_weekly)):
+                ui.progressBar.setValue(np.linspace(0,100,len(self.deaths_weekly))[i])
                 self.graphicsView.clear()
-                self.x.append(self.x_deaths[i])
-                self.y.append(self.deaths[i])
-                self.graphicsView.plot(self.x,self.y,pen=pg.mkPen(color=(200,200,200), width=2),name='Deaths in '+self.country_input,symbol='o',
+                self.x.append(self.x_deaths_weekly[i])
+                self.y.append(self.deaths_weekly[i])
+                self.graphicsView.plot(self.x,self.y,pen=pg.mkPen(color=(200,200,200), width=2),name='deaths_weekly in '+self.country_input,symbol='o',
                 symbolSize=7,symbolBrush=(200,200,200))
                 pg.QtGui.QApplication.processEvents()
             
             #second plot
             color = self.color_list[self.num_iter]
             axis_bottom1 = self.graphicsView_2.getAxis('bottom')
-            axis_bottom1.setTicks([[(i,j) for i,j in zip(self.x_deaths[0:len(self.x_deaths):20],self.dates[0:len(self.deaths):20])],[(i,'') for j,i in enumerate(self.x_deaths[0:len(self.deaths):10])]])
+            axis_bottom1.setTicks([[(i,j) for i,j in zip(self.x_deaths_weekly[0:len(self.x_deaths_weekly):20],self.dates[0:len(self.deaths_weekly):20])],[(i,'') for j,i in enumerate(self.x_deaths_weekly[0:len(self.deaths_weekly):10])]])
             self.graphicsView_2.addLegend()
-            self.graphicsView_2.plot(self.x_deaths,self.deaths,pen=pg.mkPen(color=color,width=2),name='Deaths in '+self.country_input,symbol='o',symbolBrush=color)
+            self.graphicsView_2.plot(self.x_deaths_weekly,self.deaths_weekly,pen=pg.mkPen(color=color,width=2),name='deaths_weekly in '+self.country_input,symbol='o',symbolBrush=color)
 
         if self.plot_type.currentIndex() == 2:
             self.graphicsView.addLegend()
-            self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Plotting Cumulative Average of 14 days per 100000 cases')
+            self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Plotting Cumulative Average of 14 days per 100000 cases_weekly')
             self.graphicsView.clear()
             self.x_cumulative = np.arange(0,len(self.cumulative))
             self.x=[]
@@ -523,20 +527,20 @@ class Ui_CovidTracker(object):
             self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : Plotting comparison. No animation.')
             self.graphicsView.clear()
             self.graphicsView.addLegend()
-            self.x_cases = np.arange(0,len(self.cases))
+            self.x_cases_weekly = np.arange(0,len(self.cases_weekly))
             self.graphicsView.showGrid(x=True,y=True)
-            self.graphicsView.plot(self.x_cases,abs(self.cases),pen=(255,0,0),name='Cases',symbol='o',
+            self.graphicsView.plot(self.x_cases_weekly,abs(self.cases_weekly),pen=(255,0,0),name='cases_weekly',symbol='o',
             symbolSize=7,symbolBrush=(255,0,0))
-            self.graphicsView.plot(self.x_cases,abs(self.deaths),pen=(200,200,200),name='Deaths',symbol='o',
+            self.graphicsView.plot(self.x_cases_weekly,abs(self.deaths_weekly),pen=(200,200,200),name='deaths_weekly',symbol='o',
             symbolSize=7,symbolBrush=(200,200,200))
-            self.graphicsView.plot(self.x_cases,abs(self.cumulative),pen=(0,0,255),name='Cumulative',symbol='o',
+            self.graphicsView.plot(self.x_cases_weekly,abs(self.cumulative),pen=(0,0,255),name='Cumulative',symbol='o',
             symbolSize=7,symbolBrush=(0,0,255))
             ui.progressBar.setValue(100)
             #self.graphicsView.setLogMode(x=False,y=True)
         
         if self.plot_type.currentIndex() == 4:
-            self.x_cases = np.arange(0,len(self.cases))
-            self.graphicsView.plot(self.x_cases,self.cases)
+            self.x_cases_weekly = np.arange(0,len(self.cases_weekly))
+            self.graphicsView.plot(self.x_cases_weekly,self.cases_weekly)
         
     def get_covid(self):
         if self.animated_checkbox.checkState()==False:
@@ -600,9 +604,9 @@ class Ui_CovidTracker(object):
                 if text.lower() == 'infections':
                     self.plot_type.setCurrentIndex(0)
                     self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : From voice commands : Selecting plot type > Infections')
-                elif text.lower() == 'deaths' or text.lower() == 'death':
+                elif text.lower() == 'deaths_weekly' or text.lower() == 'death':
                     self.plot_type.setCurrentIndex(1)
-                    self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : From voice commands : Selecting plot type > Deaths')
+                    self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : From voice commands : Selecting plot type > deaths_weekly')
                 elif text.lower() == 'cumulative':
                     self.plot_type.setCurrentIndex(2)
                     self.text_holder.append(datetime.datetime.now().strftime("%I:%M:%S")+' : From voice commands : Selecting plot type > Cumulative')
