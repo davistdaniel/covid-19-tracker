@@ -2,7 +2,7 @@
 A simple and fast Qt-based GUI for visualzing COVID-19 data
 
 # Update :
-**Since European Centre for Disease Prevention and Control does not provide updated data anymore, the program is also outdated and not maintained.**
+**This project is outdated and not maintained.**
 
 ## Installation
 1. Python(3.8.5)  must be installed and added to PATH. 
