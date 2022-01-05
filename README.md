@@ -92,7 +92,7 @@ Here's a quick recap of everything so far:
 ![All functions shown](https://github.com/davistdaniel/covid-19-tracker/blob/master/screenshots/full_gif.gif)
 
 #### Please note!
-I am new to programming.For suggestions, comments or if you think there is something I should improve , send me an email on : forall2087@gmail.com.
+Send me an email on : forall2087@gmail.com.
 
 The program was only tested on Windows 10. Kindly let me know if it did not work on your operating system.
 
