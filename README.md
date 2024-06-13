@@ -43,7 +43,7 @@ The program detects your the country you are in, based on your IP address.It plo
 
 The data is obtained from Covid-19 data provided by the [European Centre for Disease Prevention and Control](https://opendata.ecdc.europa.eu/covid19/casedistribution/csv). The data is updated daily and contains the latest available public data on the number of new Covid-19 cases reported per day and per country.
 
-The plotting is done with [`pyqtgraph`](http://www.pyqtgraph.org/) which is extremely fast with the graphics and works well while being embedded in a Qt application.
+The plotting is done with [`pyqtgraph`](http://www.pyqtgraph.org/) which is fast with the graphics and works well while being embedded in a Qt application.
 
 Three different parameters can be visualized per country:
 * Infections
@@ -93,9 +93,3 @@ Note : The transcription service is from Google. It fails occasionaly. An error 
 Here's a quick recap of everything so far:
 
 ![All functions shown](https://github.com/davistdaniel/covid-19-tracker/blob/master/screenshots/full_gif.gif)
-
-#### Please note!
-Send me an email on : forall2087@gmail.com.
-
-The program was only tested on Windows 10. Kindly let me know if it did not work on your operating system.
-
