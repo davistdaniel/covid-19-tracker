@@ -19,9 +19,7 @@ A simple and fast Qt-based GUI for visualzing COVID-19 data
     * random
     * datetime
     * scipy
-   
-   Not really recommended, but if you want to : Alternatively, you can skip this step and run install_covid_tracker_dependencies.py to install the dependencies by opening a terminal and running : `python install_covid_tracker_dependencies.py`. This will install all the required libraries using pip package manager. Make sure pip is on PATH.
-  
+     
 3. For Linux based OS, you also might have to run this in a terminal (This is requred by sounddevice module.).
 
    `sudo apt-get install libportaudio2`
